@@ -11,4 +11,7 @@ class Note extends Model
 
     // ✅ Tambahkan fillable untuk mengizinkan mass assignment
     protected $fillable = ['title', 'content'];
+
+    // sembunyinkan timestamps
+    protected $hidden = ['created_at', 'updated_at'];
 }
