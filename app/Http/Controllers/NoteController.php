@@ -11,7 +11,13 @@ class NoteController extends Controller
     // Menampilkan semua catatan milik user yang login
     public function index()
     {
-        return response()->json(Auth::user()->notes);
+        $user = Auth::user(); // Ambil user yang login
+
+        return response()->json([
+        'user' => $user,
+        'notes' => $user->notes
+    ]);
+
     }
 
     // Menyimpan catatan baru
