@@ -4,26 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Note;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class NoteController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Menampilkan semua catatan milik user yang login
     public function index()
     {
-        return response()->json(Note::all(), 200);
+        return response()->json(Auth::user()->notes);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    //  menyimpan catatan baru
+    // Menyimpan catatan baru
     public function store(Request $request)
     {
         $request->validate([
@@ -32,6 +23,7 @@ class NoteController extends Controller
         ]);
 
         $note = Note::create([
+            'user_id' => Auth::id(),
             'title' => $request->title,
             'content' => $request->content,
         ]);
@@ -39,23 +31,22 @@ class NoteController extends Controller
         return response()->json($note, 201);
     }
 
-    //  menampilkan  notes berdasarkan ID
+    // Menampilkan catatan berdasarkan ID
     public function show(Note $note)
     {
-        return response()->json($note, 200);
+        if ($note->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        return response()->json($note);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Note $note)
-    {
-        //
-    }
-
-    // untuk update notes
+    // Mengupdate catatan
     public function update(Request $request, Note $note)
     {
+        if ($note->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'title' => 'sometimes|string|max:255',
             'content' => 'sometimes|string',
@@ -63,14 +54,18 @@ class NoteController extends Controller
 
         $note->update($request->only(['title', 'content']));
 
-        return response()->json($note, 200);
+        return response()->json($note);
     }
 
-    // untuk delete notes
+    // Menghapus catatan
     public function destroy(Note $note)
     {
+        if ($note->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $note->delete();
 
-        return response()->json(null, 204);
+        return response()->json(['message' => 'Note deleted']);
     }
 }
