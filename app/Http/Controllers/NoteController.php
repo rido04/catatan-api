@@ -8,14 +8,31 @@ use Illuminate\Support\Facades\Auth;
 
 class NoteController extends Controller
 {
+
     // Menampilkan semua catatan milik user yang login
-    public function index()
-    {
-        $notes = Note::where('user_id', Auth::id())->paginate(5); // 5 data per halaman
+    public function index(Request $request)
+{
+    $query = Note::where('user_id', Auth::id());
 
-        return response()->json($notes);
-
+    if ($request->has('search')) {
+        $search = $request->query('search');
+        $query->where(function ($q) use ($search) {
+            $q->where('title', 'like', "%$search%")
+              ->orWhere('content', 'like', "%$search%");
+        });
     }
+
+    $notes = $query->paginate(5);
+
+    // Debugging: Cek query yang dijalankan
+    return response()->json([
+        // 'query_debug' => $query->toSql(),
+        // 'bindings' => $query->getBindings(),
+        'data' => $notes
+    ]);
+}
+
+
 
     // Menyimpan catatan baru
     public function store(Request $request)
@@ -34,6 +51,7 @@ class NoteController extends Controller
         return response()->json($note, 201);
     }
 
+
     // Menampilkan catatan berdasarkan ID
     public function show(Note $note)
     {
@@ -42,6 +60,7 @@ class NoteController extends Controller
         }
         return response()->json($note);
     }
+
 
     // Mengupdate catatan
     public function update(Request $request, Note $note)
@@ -59,6 +78,7 @@ class NoteController extends Controller
 
         return response()->json($note);
     }
+
 
     // Menghapus catatan
     public function destroy(Note $note)
