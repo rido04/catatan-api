@@ -9,7 +9,7 @@ class Note extends Model
 {
     use HasFactory;
 
-    // ✅ Tambahkan fillable untuk mengizinkan mass assignment
+    //Tambahkan fillable untuk mengizinkan mass assignment
     protected $fillable = ['user_id', 'title', 'content'];
 
     public function user()
